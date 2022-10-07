@@ -1,12 +1,13 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { DiscoveryModule } from '@nestjs/core';
+import { WorkerOptions, RuntimeOptions } from '@temporalio/worker';
+
 import { TemporalMetadataAccessor } from './temporal-metadata.accessors';
 import { TemporalExplorer } from './temporal.explorer';
 import {
   SharedWorkerAsyncConfiguration,
   TemporalModuleOptions,
 } from './interfaces';
-import { WorkerOptions, RuntimeOptions } from '@temporalio/worker';
 import {
   TEMPORAL_CORE_CONFIG,
   TEMPORAL_WORKER_CONFIG,

@@ -7,17 +7,18 @@ import {
 import { DiscoveryService, MetadataScanner, ModuleRef } from '@nestjs/core';
 import { Injector } from '@nestjs/core/injector/injector';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import { TemporalMetadataAccessor } from './temporal-metadata.accessors';
 import {
   Runtime,
   RuntimeOptions,
   Worker,
   WorkerOptions,
 } from '@temporalio/worker';
+
 import {
   TEMPORAL_CORE_CONFIG,
   TEMPORAL_WORKER_CONFIG,
 } from './temporal.constants';
+import { TemporalMetadataAccessor } from './temporal-metadata.accessors';
 
 @Injectable()
 export class TemporalExplorer
