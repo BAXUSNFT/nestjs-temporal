@@ -56,7 +56,7 @@ export class TemporalExplorer
     if (workerConfig.taskQueue) {
       const activitiesFunc = await this.handleActivities();
 
-      Runtime.install(runTimeOptions);
+      // Runtime.install(runTimeOptions);
 
       this.worker = await Worker.create(
         Object.assign(
