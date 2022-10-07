@@ -8,6 +8,8 @@ import { DiscoveryService, MetadataScanner, ModuleRef } from '@nestjs/core';
 import { Injector } from '@nestjs/core/injector/injector';
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import {
+  NativeConnection,
+  NativeConnectionOptions,
   Runtime,
   RuntimeOptions,
   Worker,
@@ -15,6 +17,7 @@ import {
 } from '@temporalio/worker';
 
 import {
+  TEMPORAL_CONNECTION_CONFIG,
   TEMPORAL_CORE_CONFIG,
   TEMPORAL_WORKER_CONFIG,
 } from './temporal.constants';
@@ -26,6 +29,7 @@ export class TemporalExplorer
 {
   private readonly injector = new Injector();
   private worker: Worker;
+  private timerId: ReturnType<typeof setInterval>;
 
   constructor(
     private readonly moduleRef: ModuleRef,
@@ -34,35 +38,51 @@ export class TemporalExplorer
     private readonly metadataScanner: MetadataScanner,
   ) {}
 
+  clearInterval() {
+    this.timerId && clearInterval(this.timerId);
+    this.timerId = null;
+  }
+
   async onModuleInit() {
     await this.explore();
   }
 
   onModuleDestroy() {
-    this.worker.shutdown();
+    this.worker?.shutdown();
+    this.clearInterval();
   }
 
   onApplicationBootstrap() {
-    setTimeout(() => {
-      this.worker.run();
+    this.timerId = setInterval(() => {
+      if (this.worker) {
+        this.worker.run();
+        this.clearInterval();
+      }
     }, 1000);
   }
 
   async explore() {
-    const workerConfig: WorkerOptions = this.getWorkerConfigOptions();
-    const runTimeOptions: RuntimeOptions = this.getRuntimeOptions();
+    const workerConfig = this.getWorkerConfigOptions();
+    const runTimeOptions = this.getRuntimeOptions();
+    const connectionOptions = this.getNativeConnectionOptions();
 
     // should contain taskQueue
     if (workerConfig.taskQueue) {
       const activitiesFunc = await this.handleActivities();
 
-      Runtime.install(runTimeOptions);
+      runTimeOptions && Runtime.install(runTimeOptions);
+
+      let connection: NativeConnection;
+      if (connectionOptions) {
+        connection = await NativeConnection.connect(connectionOptions);
+      }
 
       this.worker = await Worker.create(
         Object.assign(
           {
             activities: activitiesFunc,
-          },
+            connection,
+          } as WorkerOptions,
           workerConfig,
         ),
       );
@@ -71,6 +91,12 @@ export class TemporalExplorer
 
   getWorkerConfigOptions(name?: string): WorkerOptions {
     return this.moduleRef.get(TEMPORAL_WORKER_CONFIG || name, {
+      strict: false,
+    });
+  }
+
+  getNativeConnectionOptions(name?: string): NativeConnectionOptions {
+    return this.moduleRef.get(TEMPORAL_CONNECTION_CONFIG || name, {
       strict: false,
     });
   }
