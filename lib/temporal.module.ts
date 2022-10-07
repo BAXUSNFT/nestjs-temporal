@@ -71,7 +71,7 @@ export class TemporalModule {
     provide: string,
     options?: SharedWorkerAsyncConfiguration | SharedRuntimeAsyncConfiguration | SharedConnectionAsyncConfiguration,
   ): Provider {
-    if (options.useFactory) {
+    if (options?.useFactory) {
       return {
         provide,
         useFactory: options.useFactory,
