@@ -101,9 +101,43 @@ export class AppController {
 }
 ```
 
+## Advanced Options
+
+```ts
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TemporalModule } from 'nestjs-temporal';
+import { NativeConnection, Runtime } from '@temporalio/worker';
+
+@Module({
+  imports: [
+    TempModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => {
+        Runtime.install({});
+        const temporalHost = config.get('app.temporalHost');
+        const connection = await NativeConnection.connect({
+          address: temporalHost,
+        });
+        return {
+          connection,
+          taskQueue: 'default',
+          workflowsPath: require.resolve('../workflows'),
+        };
+      },
+    }),
+  ],
+})
+export class AppModule {}
+```
+
 ## People
 
 - Author - [Zegue kurt](https://github.com/KurtzL)
+- Contributor - [Surya Prashanth](https://github.com/Prashant-Surya)
+- Contributor - [AmirSaber Sharifi](https://github.com/amirsaber)
+- Contributor - [J.D Nicholls](https://github.com/jdnichollsc)
 
 ## License
 
