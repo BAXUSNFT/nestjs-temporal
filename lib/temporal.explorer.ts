@@ -77,19 +77,18 @@ export class TemporalExplorer
         Runtime.install(runTimeOptions);
       }
 
-      let connection: NativeConnection;
+      const workerOptions = {
+        activities: activitiesFunc,
+      } as WorkerOptions;
       if (connectionOptions) {
         this.logger.verbose('Connecting to the Temporal server');
-        connection = await NativeConnection.connect(connectionOptions);
+        workerOptions.connection = await NativeConnection.connect(connectionOptions);
       }
 
       this.logger.verbose('Creating a new Worker');
       this.worker = await Worker.create(
         Object.assign(
-          {
-            activities: activitiesFunc,
-            connection,
-          } as WorkerOptions,
+          workerOptions,
           workerConfig,
         ),
       );
