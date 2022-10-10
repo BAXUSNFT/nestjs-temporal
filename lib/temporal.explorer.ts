@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   OnApplicationBootstrap,
   OnModuleDestroy,
   OnModuleInit,
@@ -27,6 +28,7 @@ import { TemporalMetadataAccessor } from './temporal-metadata.accessors';
 export class TemporalExplorer
   implements OnModuleInit, OnModuleDestroy, OnApplicationBootstrap
 {
+  private readonly logger = new Logger(TemporalExplorer.name);
   private readonly injector = new Injector();
   private worker: Worker;
   private timerId: ReturnType<typeof setInterval>;
@@ -70,13 +72,18 @@ export class TemporalExplorer
     if (workerConfig.taskQueue) {
       const activitiesFunc = await this.handleActivities();
 
-      runTimeOptions && Runtime.install(runTimeOptions);
+      if (runTimeOptions) {
+        this.logger.verbose('Instantiating a new Core object');
+        Runtime.install(runTimeOptions);
+      }
 
       let connection: NativeConnection;
       if (connectionOptions) {
+        this.logger.verbose('Connecting to the Temporal server');
         connection = await NativeConnection.connect(connectionOptions);
       }
 
+      this.logger.verbose('Creating a new Worker');
       this.worker = await Worker.create(
         Object.assign(
           {
