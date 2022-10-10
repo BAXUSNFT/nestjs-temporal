@@ -107,7 +107,8 @@ export class AppController {
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TemporalModule } from 'nestjs-temporal';
-import { NativeConnection, Runtime } from '@temporalio/worker';
+import { bundleWorkflowCode, NativeConnection, Runtime } from '@temporalio/worker';
+import * as path from 'path';
 
 @Module({
   imports: [
@@ -120,10 +121,14 @@ import { NativeConnection, Runtime } from '@temporalio/worker';
         const connection = await NativeConnection.connect({
           address: temporalHost,
         });
+        const workflowBundle = await bundleWorkflowCode({
+          workflowsPath: path.join(__dirname, './workflows'),
+        });
+
         return {
           connection,
           taskQueue: 'default',
-          workflowsPath: require.resolve('../workflows'),
+          workflowBundle,
         };
       },
     }),
