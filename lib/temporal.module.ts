@@ -1,6 +1,7 @@
 import { DynamicModule, Module, Provider } from '@nestjs/common';
 import { DiscoveryModule } from '@nestjs/core';
 import { NativeConnectionOptions, WorkerOptions, RuntimeOptions } from '@temporalio/worker';
+import { ClientOptions } from '@temporalio/client';
 
 import { TemporalMetadataAccessor } from './temporal-metadata.accessors';
 import { TemporalExplorer } from './temporal.explorer';
@@ -25,6 +26,7 @@ export class TemporalModule {
     workerConfig: WorkerOptions,
     connectionConfig?: NativeConnectionOptions,
     runtimeConfig?: RuntimeOptions,
+    clientConfig?: ClientOptions,
   ): DynamicModule {
     const workerConfigProvider: Provider = {
       provide: TEMPORAL_WORKER_CONFIG,
@@ -41,10 +43,15 @@ export class TemporalModule {
       useValue: runtimeConfig,
     };
 
+    const clientConfigProvider: Provider = {
+      provide: TEMPORAL_CLIENT_CONFIG,
+      useValue: runtimeConfig,
+    };
+
     return {
       global: true,
       module: TemporalModule,
-      providers: [workerConfigProvider, connectionConfigProvider, runtimeConfigProvider],
+      providers: [workerConfigProvider, connectionConfigProvider, runtimeConfigProvider, clientConfigProvider],
       imports: [TemporalModule.registerCore()],
     };
   }
