@@ -7,15 +7,17 @@ import { TemporalExplorer } from './temporal.explorer';
 import {
   SharedWorkerAsyncConfiguration,
   TemporalModuleOptions,
+  SharedRuntimeAsyncConfiguration,
+  SharedConnectionAsyncConfiguration,
+  SharedClientAsyncConfiguration,
 } from './interfaces';
 import {
   TEMPORAL_CORE_CONFIG,
   TEMPORAL_WORKER_CONFIG,
   TEMPORAL_CONNECTION_CONFIG,
+  TEMPORAL_CLIENT_CONFIG
 } from './temporal.constants';
 import { createClientProviders } from './temporal.providers';
-import { SharedRuntimeAsyncConfiguration } from './interfaces/shared-runtime-config.interface';
-import { SharedConnectionAsyncConfiguration } from './interfaces/shared-connection-config.interface';
 
 @Module({})
 export class TemporalModule {
@@ -51,11 +53,13 @@ export class TemporalModule {
     asyncWorkerConfig: SharedWorkerAsyncConfiguration,
     asyncConnectionConfig?: SharedConnectionAsyncConfiguration,
     asyncRuntimeConfig?: SharedRuntimeAsyncConfiguration,
+    asyncClientConfig?: SharedClientAsyncConfiguration,
   ): DynamicModule {
     const providers: Provider[] = [
       this.createAsyncProvider(TEMPORAL_WORKER_CONFIG, asyncWorkerConfig),
       this.createAsyncProvider(TEMPORAL_CONNECTION_CONFIG, asyncConnectionConfig),
       this.createAsyncProvider(TEMPORAL_CORE_CONFIG, asyncRuntimeConfig),
+      this.createAsyncProvider(TEMPORAL_CLIENT_CONFIG, asyncClientConfig)
     ];
 
     return {
@@ -69,7 +73,7 @@ export class TemporalModule {
 
   private static createAsyncProvider(
     provide: string,
-    options?: SharedWorkerAsyncConfiguration | SharedRuntimeAsyncConfiguration | SharedConnectionAsyncConfiguration,
+    options?: SharedWorkerAsyncConfiguration | SharedRuntimeAsyncConfiguration | SharedConnectionAsyncConfiguration | SharedClientAsyncConfiguration,
   ): Provider {
     if (options?.useFactory) {
       return {
